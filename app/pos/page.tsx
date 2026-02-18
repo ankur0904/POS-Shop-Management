@@ -182,12 +182,12 @@ export default function POSPage() {
 
   return (
     <DashboardLayout>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-6rem)]">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 lg:h-[calc(100vh-8rem)]">
         {/* Products Section */}
-        <div className="lg:col-span-2 space-y-4 overflow-hidden flex flex-col">
+        <div className="lg:col-span-2 space-y-3 lg:space-y-4 lg:overflow-hidden lg:flex lg:flex-col">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Point of Sale</h1>
-            <p className="text-muted-foreground mt-1">Quick billing and checkout</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Point of Sale</h1>
+            <p className="text-sm text-muted-foreground mt-1">Quick billing and checkout</p>
           </div>
 
           {/* Search */}
@@ -203,19 +203,19 @@ export default function POSPage() {
           </div>
 
           {/* Products Grid */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+          <div className="lg:flex-1 lg:overflow-y-auto max-h-[400px] lg:max-h-none">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 lg:gap-4 pb-4">
               {filteredProducts.map((product) => (
                 <Card
                   key={product.id}
                   className="cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => handleAddToCart(product)}
                 >
-                  <CardContent className="p-4">
-                    <h3 className="font-medium text-sm truncate">{product.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{product.sku}</p>
+                  <CardContent className="p-3 lg:p-4">
+                    <h3 className="font-medium text-xs sm:text-sm truncate">{product.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{product.sku}</p>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="font-bold text-blue-600">
+                      <span className="font-bold text-xs sm:text-sm text-blue-600">
                         {getCurrencySymbol(shop?.currency)} {product.price.toFixed(2)}
                       </span>
                       <Badge
@@ -233,26 +233,28 @@ export default function POSPage() {
         </div>
 
         {/* Cart Section */}
-        <div className="bg-card rounded-lg border border-border p-6 flex flex-col">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5" />
+        <div className="bg-card rounded-lg border border-border p-4 lg:p-6 flex flex-col lg:sticky lg:top-4">
+          <h2 className="text-lg lg:text-xl font-bold mb-3 lg:mb-4 flex items-center gap-2">
+            <ShoppingBag className="h-4 w-4 lg:h-5 lg:w-5" />
             Cart ({items.length})
           </h2>
 
           {/* Customer Info */}
-          <div className="space-y-3 mb-4">
+          <div className="space-y-2 lg:space-y-3 mb-3 lg:mb-4">
             <Input
               placeholder="Customer Name (Optional)"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
+              className="text-sm"
             />
             <Input
               placeholder={sendReceipt ? "Customer Phone (Required)" : "Customer Phone (Optional)"}
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
               required={sendReceipt}
+              className="text-sm"
             />
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Checkbox
                 id="send-receipt"
                 checked={sendReceipt}
@@ -264,41 +266,41 @@ export default function POSPage() {
               >
                 Send receipt to customer?
               </Label>
-            </div>
+            </div> */}
           </div>
 
-          <Separator className="my-4" />
+          <Separator className="my-3 lg:my-4" />
 
           {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto space-y-3">
+          <div className="flex-1 lg:overflow-y-auto space-y-2 lg:space-y-3 max-h-[300px] lg:max-h-none">
             {items.length === 0 ? (
-              <div className="text-center text-muted-foreground py-12">
-                <ShoppingBag className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>Cart is empty</p>
+              <div className="text-center text-muted-foreground py-8 lg:py-12">
+                <ShoppingBag className="h-8 w-8 lg:h-12 lg:w-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Cart is empty</p>
               </div>
             ) : (
               items.map((item) => (
-                <div key={item.product.id} className="flex items-center gap-2 pb-3 border-b">
+                <div key={item.product.id} className="flex items-center gap-2 pb-2 lg:pb-3 border-b">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{item.product.name}</p>
+                    <p className="font-medium text-xs sm:text-sm truncate">{item.product.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {getCurrencySymbol(shop?.currency)} {item.product.price.toFixed(2)} each
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 lg:gap-2">
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-7 w-7"
+                      className="h-6 w-6 lg:h-7 lg:w-7"
                       onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
-                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                    <span className="w-6 lg:w-8 text-center font-medium text-xs lg:text-sm">{item.quantity}</span>
                     <Button
                       size="icon"
                       variant="outline"
-                      className="h-7 w-7"
+                      className="h-6 w-6 lg:h-7 lg:w-7"
                       onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                       disabled={item.quantity >= item.product.stock_quantity}
                     >
@@ -307,7 +309,7 @@ export default function POSPage() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-7 w-7 text-red-500"
+                      className="h-6 w-6 lg:h-7 lg:w-7 text-red-500"
                       onClick={() => removeItem(item.product.id)}
                     >
                       <Trash2 className="h-3 w-3" />
@@ -319,9 +321,9 @@ export default function POSPage() {
           </div>
 
           {/* Totals */}
-          <div className="space-y-3 mt-4">
+          <div className="space-y-2 lg:space-y-3 mt-3 lg:mt-4">
             <Separator />
-            <div className="flex justify-between text-lg font-bold">
+            <div className="flex justify-between text-base lg:text-lg font-bold">
               <span>Total</span>
               <span>
                 {getCurrencySymbol(shop?.currency)} {total.toFixed(2)}
@@ -330,7 +332,7 @@ export default function POSPage() {
 
             {/* Payment Method */}
             <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Payment method" />
               </SelectTrigger>
               <SelectContent>
@@ -344,13 +346,13 @@ export default function POSPage() {
 
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" onClick={() => clearCart()} disabled={items.length === 0}>
+              <Button variant="outline" onClick={() => clearCart()} disabled={items.length === 0} className="text-sm">
                 Clear
               </Button>
               <Button
                 onClick={handleCheckout}
                 disabled={items.length === 0 || processing}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-sm"
               >
                 {processing ? 'Processing...' : 'Checkout'}
               </Button>
@@ -361,7 +363,7 @@ export default function POSPage() {
               <Button
                 onClick={handleShareReceipt}
                 variant="outline"
-                className="w-full mt-2 border-green-600 text-green-600 hover:bg-green-50"
+                className="w-full mt-2 border-green-600 text-green-600 hover:bg-green-50 text-sm"
               >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share Receipt

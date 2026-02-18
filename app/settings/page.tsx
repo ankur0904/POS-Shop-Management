@@ -151,29 +151,29 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-500 mt-1">Manage your account and business settings</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your account and business settings</p>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="business">Business</TabsTrigger>
-            <TabsTrigger value="preferences">Preferences</TabsTrigger>
+        <Tabs defaultValue="profile" className="space-y-4 lg:space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
+            <TabsTrigger value="business" className="text-xs sm:text-sm">Business</TabsTrigger>
+            <TabsTrigger value="preferences" className="text-xs sm:text-sm">Preferences</TabsTrigger>
           </TabsList>
 
           {/* Profile Settings Tab */}
-          <TabsContent value="profile" className="space-y-6">
+          <TabsContent value="profile" className="space-y-4 lg:space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>View your account details</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Account Information</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">View your account details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Current Email</Label>
+                  <Label className="text-sm">Current Email</Label>
                   <Input value={user?.email || ''} disabled />
                 </div>
               </CardContent>
@@ -181,12 +181,12 @@ export default function SettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Change Email</CardTitle>
-                <CardDescription>Update your email address (requires verification)</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Change Email</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Update your email address (requires verification)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="new-email">New Email Address</Label>
+                  <Label htmlFor="new-email" className="text-sm">New Email Address</Label>
                   <Input
                     id="new-email"
                     type="email"
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                     placeholder="Enter new email"
                   />
                 </div>
-                <Button onClick={handleEmailChange} disabled={saving || !newEmail}>
+                <Button onClick={handleEmailChange} disabled={saving || !newEmail} className="text-sm">
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Update Email
                 </Button>
@@ -204,12 +204,12 @@ export default function SettingsPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Change Password</CardTitle>
-                <CardDescription>Update your password to keep your account secure</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Change Password</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Update your password to keep your account secure</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="current-password">Current Password</Label>
+                  <Label htmlFor="current-password" className="text-sm">Current Password</Label>
                   <Input
                     id="current-password"
                     type="password"
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  <Label htmlFor="new-password" className="text-sm">New Password</Label>
                   <Input
                     id="new-password"
                     type="password"
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Label htmlFor="confirm-password" className="text-sm">Confirm New Password</Label>
                   <Input
                     id="confirm-password"
                     type="password"
@@ -241,6 +241,7 @@ export default function SettingsPage() {
                 <Button
                   onClick={handlePasswordChange}
                   disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                  className="text-sm"
                 >
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Update Password
@@ -250,14 +251,14 @@ export default function SettingsPage() {
           </TabsContent>
 
           {/* Business Settings Tab */}
-          <TabsContent value="business" className="space-y-6">
+          <TabsContent value="business" className="space-y-4 lg:space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Business Information</CardTitle>
-                <CardDescription>Manage your business details and tax information</CardDescription>
+                <CardTitle className="text-base sm:text-lg">Business Information</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Manage your business details and tax information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="business-name">Business Name *</Label>
                     <Input

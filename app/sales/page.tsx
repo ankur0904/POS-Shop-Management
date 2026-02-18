@@ -77,29 +77,29 @@ export default function SalesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Sales History</h1>
-          <p className="text-gray-500 mt-1">View all transactions and invoices</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sales History</h1>
+          <p className="text-sm text-gray-500 mt-1">View all transactions and invoices</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Sales</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total Sales</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sales.length}</div>
+              <div className="text-xl sm:text-2xl font-bold">{sales.length}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {getCurrencySymbol(shop.currency)} {totalRevenue.toFixed(2)}
               </div>
             </CardContent>
@@ -107,10 +107,10 @@ export default function SalesPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Average Sale</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-600">Average Sale</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {getCurrencySymbol(shop.currency)} {sales.length ? (totalRevenue / sales.length).toFixed(2) : '0.00'}
               </div>
             </CardContent>
@@ -132,20 +132,20 @@ export default function SalesPage() {
         {/* Sales Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Recent Transactions</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
+          <CardContent className="overflow-x-auto">
+            <Table className="min-w-[768px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Invoice #</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Invoice #</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Customer</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Items</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Payment</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Amount</TableHead>
+                  <TableHead className="text-center text-xs sm:text-sm">Status</TableHead>
+                  <TableHead className="text-right text-xs sm:text-sm">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -158,24 +158,24 @@ export default function SalesPage() {
                 ) : (
                   filteredSales.map((sale) => (
                     <TableRow key={sale.id}>
-                      <TableCell className="font-mono text-sm">{sale.invoice_number}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-mono text-xs sm:text-sm">{sale.invoice_number}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         {format(new Date(sale.created_at), 'MMM dd, yyyy HH:mm')}
                       </TableCell>
-                      <TableCell>{sale.customer_name || 'Walk-in'}</TableCell>
-                      <TableCell>{sale.sale_items?.length || 0}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{sale.customer_name || 'Walk-in'}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{sale.sale_items?.length || 0}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="capitalize">
+                        <Badge variant="outline" className="capitalize text-xs">
                           {sale.payment_method}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right font-bold">
+                      <TableCell className="text-right font-bold text-xs sm:text-sm">
                         {getCurrencySymbol(shop.currency)} {Number(sale.total_amount).toFixed(2)}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge
                           variant={sale.status === 'completed' ? 'default' : 'destructive'}
-                          className="capitalize"
+                          className="capitalize text-xs"
                         >
                           {sale.status}
                         </Badge>
@@ -200,9 +200,9 @@ export default function SalesPage() {
 
         {/* View Sale Dialog */}
         <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Sale Details - {selectedSale?.invoice_number}</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg">Sale Details - {selectedSale?.invoice_number}</DialogTitle>
             </DialogHeader>
             {selectedSale && (
               <div className="space-y-4">

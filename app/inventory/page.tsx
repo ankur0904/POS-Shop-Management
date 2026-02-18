@@ -172,19 +172,19 @@ export default function InventoryPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 lg:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
-            <p className="text-gray-500 mt-1">Manage products and stock levels</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Inventory Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Manage products and stock levels</p>
           </div>
           {canEdit && (
             <div className="flex gap-2">
               <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="cursor-pointer">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Category
+                  <Button variant="outline" className="cursor-pointer text-sm">
+                    <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Add </span>Category
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -207,9 +207,9 @@ export default function InventoryPage() {
 
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={() => setEditingProduct(null)} className="cursor-pointer">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Product
+                  <Button onClick={() => setEditingProduct(null)} className="cursor-pointer text-sm">
+                    <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Add </span>Product
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -332,17 +332,17 @@ export default function InventoryPage() {
         {lowStockProducts.length > 0 && (
           <Card className="border-orange-200 bg-orange-50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-700">
-                <AlertTriangle className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-orange-700 text-base sm:text-lg">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
                 Low Stock Alert ({lowStockProducts.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {lowStockProducts.slice(0, 5).map((product) => (
-                  <div key={product.id} className="flex items-center justify-between text-sm">
-                    <span>{product.name}</span>
-                    <Badge variant="destructive">{product.stock_quantity} left</Badge>
+                  <div key={product.id} className="flex items-center justify-between text-xs sm:text-sm">
+                    <span className="truncate mr-2">{product.name}</span>
+                    <Badge variant="destructive" className="text-xs">{product.stock_quantity} left</Badge>
                   </div>
                 ))}
               </div>
@@ -353,19 +353,19 @@ export default function InventoryPage() {
         {/* Products Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Products ({filteredProducts.length}{searchQuery ? ` of ${products.length}` : ''})</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Products ({filteredProducts.length}{searchQuery ? ` of ${products.length}` : ''})</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
+          <CardContent className="overflow-x-auto">
+            <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  {canEdit && <TableHead>Actions</TableHead>}
+                  <TableHead className="text-xs sm:text-sm">SKU</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Name</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Category</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Price</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Stock</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Status</TableHead>
+                  {canEdit && <TableHead className="text-xs sm:text-sm">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -378,10 +378,10 @@ export default function InventoryPage() {
                 ) : (
                   filteredProducts.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{(product as any).category?.name || '-'}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-mono text-xs sm:text-sm">{product.sku}</TableCell>
+                    <TableCell className="font-medium text-xs sm:text-sm">{product.name}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">{(product as any).category?.name || '-'}</TableCell>
+                    <TableCell className="text-xs sm:text-sm">
                       {getCurrencySymbol(shop?.currency)} {product.price.toFixed(2)}
                     </TableCell>
                     <TableCell>
