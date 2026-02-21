@@ -105,7 +105,7 @@ export async function getTopSellingProducts(shopId: string, limit = 10) {
         productId: item.product_id,
         productName: item.product_name,
         productSku: item.product_sku,
-        imageUrl: item.product?.image_url,
+        imageUrl: item.product?.[0]?.image_url,
         totalQuantity: item.quantity,
         totalRevenue: Number(item.subtotal),
       });
