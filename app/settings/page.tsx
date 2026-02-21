@@ -158,10 +158,10 @@ export default function SettingsPage() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-4 lg:space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
-            <TabsTrigger value="business" className="text-xs sm:text-sm">Business</TabsTrigger>
-            <TabsTrigger value="preferences" className="text-xs sm:text-sm">Preferences</TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full sm:inline-flex sm:w-auto sm:justify-start">
+            <TabsTrigger value="profile" className="text-xs sm:text-sm sm:flex-none">Profile</TabsTrigger>
+            <TabsTrigger value="business" className="text-xs sm:text-sm sm:flex-none">Business</TabsTrigger>
+            <TabsTrigger value="preferences" className="text-xs sm:text-sm sm:flex-none">Preferences</TabsTrigger>
           </TabsList>
 
           {/* Profile Settings Tab */}

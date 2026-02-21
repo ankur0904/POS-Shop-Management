@@ -27,9 +27,9 @@ import { Badge } from '@/components/ui/badge'
 import { useCurrentShop } from '@/hooks/use-auth'
 import { getProducts, getCategories, createProduct, updateProduct, adjustStock, createCategory } from '@/app/actions/products'
 import { Product, Category } from '@/types/database.types'
-import { Plus, Edit, Package, AlertTriangle, Search } from 'lucide-react'
+import { Plus, Edit, Package, AlertTriangle, Search, FileSpreadsheet } from 'lucide-react'
 import { toast } from 'sonner'
-import { getCurrencySymbol } from '@/lib/utils'
+import { getCurrencySymbol, exportToCSV } from '@/lib/utils'
 import { InventorySkeleton } from '@/components/loading-skeletons'
 
 export default function InventoryPage() {
@@ -162,6 +162,56 @@ export default function InventoryPage() {
 
   const lowStockProducts = filteredProducts.filter(p => p.stock_quantity < p.low_stock_threshold)
 
+  const handleExportCSV = () => {
+    if (filteredProducts.length === 0) {
+      toast.error('No data to export')
+      return
+    }
+
+    const columns = [
+      { key: 'name' as const, label: 'Product Name' },
+      { key: 'sku' as const, label: 'SKU' },
+      { key: 'barcode' as const, label: 'Barcode' },
+      { key: 'price' as const, label: 'Price' },
+      { key: 'cost' as const, label: 'Cost' },
+      { key: 'stock_quantity' as const, label: 'Stock Quantity' },
+      { key: 'low_stock_threshold' as const, label: 'Low Stock Threshold' },
+    ]
+
+    // Format data for export
+    const exportData = filteredProducts.map(product => ({
+      name: product.name,
+      sku: product.sku,
+      barcode: product.barcode || '',
+      category: (product as any).category?.name || '',
+      price: product.price,
+      cost: product.cost || '',
+      stock_quantity: product.stock_quantity,
+      low_stock_threshold: product.low_stock_threshold,
+    }))
+
+    // Add category column
+    const columnsWithCategory = [
+      { key: 'name' as const, label: 'Product Name' },
+      { key: 'sku' as const, label: 'SKU' },
+      { key: 'barcode' as const, label: 'Barcode' },
+      { key: 'category' as const, label: 'Category' },
+      { key: 'price' as const, label: 'Price' },
+      { key: 'cost' as const, label: 'Cost' },
+      { key: 'stock_quantity' as const, label: 'Stock Quantity' },
+      { key: 'low_stock_threshold' as const, label: 'Low Stock Threshold' },
+    ]
+
+    // Generate filename
+    const today = new Date()
+    const dateStr = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`
+    const filterSuffix = searchQuery ? `-${searchQuery.replace(/[^a-zA-Z0-9]/g, '_')}` : ''
+    const filename = `inventory${filterSuffix}-${dateStr}`
+
+    exportToCSV(exportData, filename, columnsWithCategory)
+    toast.success('Inventory exported successfully')
+  }
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -187,20 +237,20 @@ export default function InventoryPage() {
                     <span className="hidden sm:inline">Add </span>Category
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="w-[95vw] sm:w-full max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Create Category</DialogTitle>
+                    <DialogTitle className="text-lg sm:text-xl">Create Category</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateCategory} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cat-name">Name</Label>
-                      <Input id="cat-name" name="name" required />
+                  <form onSubmit={handleCreateCategory} className="space-y-3 sm:space-y-4">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="cat-name" className="text-sm">Name</Label>
+                      <Input id="cat-name" name="name" required className="text-sm" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cat-description">Description</Label>
-                      <Input id="cat-description" name="description" />
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="cat-description" className="text-sm">Description</Label>
+                      <Input id="cat-description" name="description" className="text-sm" />
                     </div>
-                    <Button type="submit" className="w-full">Create Category</Button>
+                    <Button type="submit" className="w-full text-sm sm:text-base mt-4">Create Category</Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -212,56 +262,56 @@ export default function InventoryPage() {
                     <span className="hidden sm:inline">Add </span>Product
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
                   <DialogHeader>
-                    <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-                    <DialogDescription>
+                    <DialogTitle className="text-lg sm:text-xl">{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+                    <DialogDescription className="text-xs sm:text-sm">
                       {editingProduct ? 'Update product details' : 'Add a new product to your inventory'}
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Product Name *</Label>
-                        <Input id="name" name="name" defaultValue={editingProduct?.name} required />
+                  <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="name" className="text-sm">Product Name *</Label>
+                        <Input id="name" name="name" defaultValue={editingProduct?.name} required className="text-sm" />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="sku">SKU *</Label>
-                        <Input id="sku" name="sku" defaultValue={editingProduct?.sku} required />
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="sku" className="text-sm">SKU *</Label>
+                        <Input id="sku" name="sku" defaultValue={editingProduct?.sku} required className="text-sm" />
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <Input id="description " name="description" defaultValue={editingProduct?.description || ''} />
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="description" className="text-sm">Description</Label>
+                      <Input id="description " name="description" defaultValue={editingProduct?.description || ''} className="text-sm" />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="category_id">Category</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="category_id" className="text-sm">Category</Label>
                         <Select name="category_id" defaultValue={editingProduct?.category_id || 'none'}>
-                          <SelectTrigger>
+                          <SelectTrigger className="text-sm">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">No Category</SelectItem>
+                            <SelectItem value="none" className="text-sm">No Category</SelectItem>
                             {categories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>
+                              <SelectItem key={cat.id} value={cat.id} className="text-sm">
                                 {cat.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="barcode">Barcode</Label>
-                        <Input id="barcode" name="barcode" defaultValue={editingProduct?.barcode || ''} />
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="barcode" className="text-sm">Barcode</Label>
+                        <Input id="barcode" name="barcode" defaultValue={editingProduct?.barcode || ''} className="text-sm" />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="price">Selling Price *</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="price" className="text-sm">Selling Price *</Label>
                         <Input
                           id="price"
                           name="price"
@@ -269,44 +319,48 @@ export default function InventoryPage() {
                           step="0.01"
                           defaultValue={editingProduct?.price}
                           required
+                          className="text-sm"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cost">Cost Price</Label>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="cost" className="text-sm">Cost Price</Label>
                         <Input
                           id="cost"
                           name="cost"
                           type="number"
                           step="0.01"
                           defaultValue={editingProduct?.cost || ''}
+                          className="text-sm"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="stock_quantity">Stock Quantity *</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="stock_quantity" className="text-sm">Stock Quantity *</Label>
                         <Input
                           id="stock_quantity"
                           name="stock_quantity"
                           type="number"
                           defaultValue={editingProduct?.stock_quantity || 0}
                           required
+                          className="text-sm"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="low_stock_threshold">Low Stock Alert *</Label>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="low_stock_threshold" className="text-sm">Low Stock Alert *</Label>
                         <Input
                           id="low_stock_threshold"
                           name="low_stock_threshold"
                           type="number"
                           defaultValue={editingProduct?.low_stock_threshold || 10}
                           required
+                          className="text-sm"
                         />
                       </div>
                     </div>
 
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full text-sm sm:text-base mt-4">
                       {editingProduct ? 'Update Product' : 'Create Product'}
                     </Button>
                   </form>
@@ -352,8 +406,17 @@ export default function InventoryPage() {
 
         {/* Products Table */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="text-base sm:text-lg">Products ({filteredProducts.length}{searchQuery ? ` of ${products.length}` : ''})</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExportCSV}
+              className="cursor-pointer h-8 w-8 p-0"
+              title="Download as CSV"
+            >
+              <FileSpreadsheet className="h-4 w-4 text-green-600" />
+            </Button>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table className="min-w-[640px]">
@@ -442,25 +505,25 @@ export default function InventoryPage() {
 
       {/* Adjust Stock Dialog */}
       <Dialog open={!!adjustStockProduct} onOpenChange={() => setAdjustStockProduct(null)}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:w-full max-w-md">
           <DialogHeader>
-            <DialogTitle>Adjust Stock: {adjustStockProduct?.name}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-lg sm:text-xl">Adjust Stock: {adjustStockProduct?.name}</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Current stock: {adjustStockProduct?.stock_quantity}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleAdjustStock} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="change">
-                Quantity Change (positive to add, negative to remove)
+          <form onSubmit={handleAdjustStock} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="change" className="text-sm">
+                Quantity Change (+ add, - remove)
               </Label>
-              <Input id="change" name="change" type="number" required />
+              <Input id="change" name="change" type="number" required className="text-sm" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Input id="notes" name="notes" placeholder="Reason for adjustment" />
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="notes" className="text-sm">Notes</Label>
+              <Input id="notes" name="notes" placeholder="Reason for adjustment" className="text-sm" />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full text-sm sm:text-base mt-4">
               Adjust Stock
             </Button>
           </form>
