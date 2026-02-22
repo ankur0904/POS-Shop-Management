@@ -1,0 +1,24 @@
+{
+  "version": 0.1,
+  "locale": "en",
+  "entries": {
+    "f60188b953fc": "English",
+    "36770627b8b2": "हिन्दी",
+    "7d61563a0f72": "ShopManager",
+    "102b0dc97228": "Toggle menu",
+    "7e1808790045": "Sign Out",
+    "90ede513eabc": "Analytics & Reports",
+    "fec06253e022": "Business insights and performance metrics",
+    "89ed97a618c5": "This Month",
+    "20cb8101ea95": "{expression0} sales",
+    "151b6c892bfe": "This Week",
+    "d2a2188f3985": "Today",
+    "87bb0c8ec337": "Avg. Sale",
+    "072bb46db0c5": "This month",
+    "69eb11dc07b2": "Sales Trend (Last 14 Days)",
+    "a381fa129d69": "Top Products Distribution",
+    "21bb346bfdd4": "Top Selling Products (Last 30 Days)",
+    "7c7829657af0": "No sales data available",
+    "3b6f2728035d": "Revenue by Product (Top 10)"
+  }
+}
