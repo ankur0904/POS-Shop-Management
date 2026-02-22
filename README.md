@@ -1,283 +1,185 @@
-# 🏪 ShopManager - Multi-Tenant POS & Business Management System
+# ShopManager — Multi-Tenant POS & Shop Management SaaS
 
-A production-grade, full-stack Point of Sale (POS) and business management system built for the Lingo.dev hackathon. Built with Next.js 14, TypeScript, Supabase, and shadcn/ui.
+<p align="center">
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"/></a>
+  &nbsp;
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/></a>
+  &nbsp;
+  <a href="https://lingo.dev"><img src="https://img.shields.io/badge/Lingo.dev-i18n-6366F1?style=for-the-badge&logo=translate&logoColor=white" alt="Lingo.dev"/></a>
+  &nbsp;
+  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
+  &nbsp;
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/></a>
+</p>
 
-## 🎯 Features
+**ShopManager** is a **multi-tenant POS & shop management SaaS** built with **Next.js, Supabase, and Lingo.dev**.  
+It enables businesses to manage **sales, inventory, analytics, and billing** with secure **tenant isolation and role-based access**.
 
-### 🔐 **Multi-Tenant Architecture**
-- Each shop gets isolated, secure data
-- Shop owner registration and management
-- Role-based access control (Admin, Cashier, Inventory Manager)
+Built for **Lingo.dev Hackathon 2026**.
 
-### 🛒 **Point of Sale (POS)**
-- Fast, intuitive billing interface
-- Real-time product search (by name, SKU, or barcode)
-- Shopping cart with quantity management
-- Multiple payment methods (Cash, Card, UPI, Digital)
-- Automatic stock deduction on sale
-- Invoice generation
+---
 
-### 📦 **Inventory Management**
-- Product CRUD operations with categories
-- SKU and barcode support
-- Stock tracking with low-stock alerts
-- Stock adjustment history/audit logs
+## Features
+
+- Multi-tenant architecture (per-shop isolation)
+- Role-based access (Admin, Cashier, Inventory Manager)
+- POS system with cart and checkout
+- Inventory management with stock tracking
+- Sales history with invoice generation (PDF)
+- Revenue analytics and charts
+- Low-stock alerts
+- Internationalization (English ↔ Hindi via Lingo.dev)
+- Secure authentication using Supabase + RLS
+- Fully responsive UI
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|------|------------|
+| Framework | Next.js (App Router) |
+| Language | TypeScript |
+| Backend | Supabase (Postgres + Auth + RLS) |
+| State | Zustand |
+| Styling | Tailwind CSS |
+| UI | shadcn/ui + Radix |
+| Validation | Zod + React Hook Form |
+| Charts | Recharts |
+| i18n | Lingo.dev |
+| PDF | jsPDF |
+
+---
+
+## Architecture Overview
+
+```
+
+Next.js (App Router)
+├── Server Actions (Auth, Products, Sales, Analytics, Settings)
+├── Supabase (Postgres + RLS + Auth)
+├── Zustand (Shop + Cart state)
+├── Multi-tenant via shop_id
+└── Lingo.dev i18n layer
+
+````
+
+---
+
+## Core Modules
+
+### Authentication & Multi-Tenancy
+- Shop owner signup creates shop automatically
+- Role-based access
+- Secure middleware route protection
+
+### POS
+- Fast checkout flow
+- Zustand-powered cart
+- Invoice and receipt generation
+
+### Inventory
+- Product CRUD
 - Category management
-- Bulk operations
+- Stock adjustments with audit logs
+- Low-stock alerts
 
-### 📊 **Analytics & Reports**
-- Real-time dashboard with key metrics
-- Sales trends (daily, weekly, monthly)
-- Revenue tracking and charts
-- Top-selling products analysis  
-- Low stock alerts
-- Custom date range reports
+### Sales
+- Full transaction history
+- Sequential invoice numbers via database
+- CSV export and PDF receipts
 
-### 🧾 **Sales Management**
-- Complete sales history
-- Invoice viewing and management
-- Customer information tracking
-- Payment method tracking
-- Sale status management
+### Analytics
+- Revenue charts
+- Top-selling products
+- Daily / monthly statistics
 
-### 🔒 **Security Features**
-- Row Level Security (RLS) policies in Supabase
-- Tenant isolation at database level
-- Role-based permissions
-- Secure authentication with Supabase Auth
-- Protected API routes
-- Middleware authentication
+---
 
-## 🛠️ Tech Stack
+## Database (Supabase)
 
-### **Frontend**
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: TailwindCSS v4
-- **UI Components**: shadcn/ui
-- **Icons**: Lucide React
-- **Charts**: Recharts
-- **State Management**: Zustand
-- **Date Handling**: date-fns
+- Multi-tenant using `shop_id`
+- Row Level Security enabled
+- Inventory triggers prevent negative stock
+- Sequential invoice numbering (`INV-YYYYMM-XXXX`)
+- Full audit trail for stock changes
 
-### **Backend**
-- **BaaS**: Supabase
-  - PostgreSQL Database
-  - Authentication
-  - Row Level Security
-  - Real-time subscriptions
-  - Storage (for future invoice PDFs)
+---
 
-### **Database**
-- PostgreSQL with advanced features:
-  - Triggers for automatic stock updates
-  - Functions for invoice number generation
-  - Comprehensive RLS policies
-  - Indexes for performance
-  - Audit trails
+## Internationalization (Lingo.dev)
 
-## 📋 Prerequisites
+- Automatic translation (English → Hindi)
+- Runtime language switching
+- Cached translation files
+- Compiler-driven extraction
 
-- Node.js 18+ and npm
-- Supabase account
-- Git
+---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1. Clone the Repository
+### Clone Repository
 
 ```bash
 git clone <your-repo-url>
-cd business-management
-```
+cd shopmanager
+````
 
-### 2. Install Dependencies
+### Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Setup Supabase
+### Setup Environment Variables
 
-1. Go to [https://app.supabase.com](https://app.supabase.com)
-2. Create a new project
-3. Go to **Project Settings** → **API**
-4. Copy your:
-   - **Project URL**
-   - **anon/public key**
+Create `.env.local`
 
-### 4. Configure Environment Variables
-
-Create a `.env.local` file in the root directory:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-project-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 5. Setup Database Schema
-
-1. Go to Supabase Dashboard → **SQL Editor**
-2. Create a new query
-3. Copy the entire content from `supabase/schema.sql`
-4. Paste and run the SQL
-
-This will create:
-- All tables (shops, products, sales, etc.)
-- Row Level Security policies
-- Database functions and triggers
-- Indexes for performance
-
-### 6. Run the Development Server
+### Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+---
 
-### 7. Create Your First Shop
+## Hackathon Notes
 
-1. Click **"Get Started"** or **"Register"**
-2. Fill in:
-   - Full Name
-   - Shop Name
-   - Email
-   - Password
-3. You'll be auto-logged in to your dashboard!
-
-## 📁 Project Structure
-
-```
-business-management/
-├── app/
-│   ├── actions/          # Server actions
-│   │   ├── auth.ts       # Authentication actions
-│   │   ├── products.ts   # Inventory actions
-│   │   ├── sales.ts      # Sales actions
-│   │   └── analytics.ts  # Analytics actions
-│   ├── dashboard/        # Dashboard page
-│   ├── pos/              # Point of Sale page
-│   ├── inventory/        # Inventory management page
-│   ├── sales/            # Sales history page
-│   ├── analytics/        # Analytics page
-│   ├── login/            # Login page
-│   ├── register/         # Registration page
-│   ├── layout.tsx        # Root layout
-│   ├── page.tsx          # Landing page
-│   └── globals.css       # Global styles
-├── components/
-│   ├── ui/               # shadcn/ui components
-│   └── dashboard-layout.tsx  # Main dashboard layout
-├── hooks/
-│   └── use-auth.ts       # Authentication hooks
-├── lib/
-│   ├── supabase/         # Supabase clients
-│   │   ├── client.ts     # Browser client
-│   │   └── server.ts     # Server client
-│   ├── store/            # Zustand stores
-│   │   ├── cart-store.ts # POS cart state
-│   │   └── shop-store.ts # Shop state
-│   └── utils.ts          # Utility functions
-├── types/
-│   └── database.types.ts # TypeScript types
-├── supabase/
-│   └── schema.sql        # Database schema
-├── middleware.ts         # Next.js middleware
-└── package.json
-```
-
-## 🔑 Key Features Explained
-
-### Multi-Tenancy
-
-Each shop is completely isolated:
-- Shop owners register and get their own space
-- All data is filtered by `shop_id`
-- RLS policies ensure data security
-- Users can belong to multiple shops with different roles
-
-### Role-Based Access Control
-
-Three role types:
-- **Admin**: Full access to everything
-- **Cashier**: Can process sales, view inventory
-- **Inventory Manager**: Can manage products and stock
-
-### Database Triggers
-
-Automatic processes:
-- Stock deduction on sale creation
-- Inventory logging for audit trails
-- Negative stock prevention
-- Auto-generated invoice numbers
-
-### Performance Optimizations
-
-- Database indexes on frequently queried columns
-- Server-side rendering where applicable
-- Optimized SQL queries
-- Efficient state management with Zustand
-
-## 📸 Screenshots
-
-### Landing Page
-Beautiful hero section with feature highlights
-
-### Dashboard
-Real-time metrics, charts, and recent sales
-
-### POS System
-Fast billing with product search and cart management
-
-### Inventory Management
-Product management with categories and stock tracking
-
-### Analytics
-Comprehensive business insights with interactive charts
-
-## 🔐 Security
-
-- ✅ Row Level Security (RLS) on all tables
-- ✅ Server-side authentication checks
-- ✅ Protected API routes
-- ✅ Tenant isolation at database level
-- ✅ SQL injection prevention
-- ✅ XSS protection
-- ✅ CSRF protection via Next.js
-
-## 🚧 Future Enhancements
-
-- [ ] PDF invoice generation and download
-- [ ] Email invoice sending
-- [ ] Multi-currency support
-- [ ] Barcode scanner integration
-- [ ] Customer loyalty program
-- [ ] Supplier management
-- [ ] Purchase orders
-- [ ] Multi-location support
-- [ ] Mobile app (React Native)
-- [ ] Print receipt functionality
-- [ ] Expense tracking
-- [ ] Employee attendance
-- [ ] Tax calculation automation
-
-## 📝 License
-
-This project was built for the Lingo.dev Hackathon (Feb 16-23, 2026)
-
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- Powered by [Supabase](https://supabase.com/)
-- UI by [shadcn/ui](https://ui.shadcn.com/)
-- Icons by [Lucide](https://lucide.dev/)
-
-## 📧 Contact
-
-For questions or feedback, reach out via the hackathon platform.
+* Built from scratch during Lingo.dev Hackathon
+* Uses Lingo.dev for real-world i18n implementation
+* Clean commit history
+* Production-grade multi-tenant architecture
+* Secure Supabase RLS design
 
 ---
 
-**Built with ❤️ for the Lingo.dev Hackathon 🚀**
+## Demo
+
+Add your demo video link here:
+
+```
+[Demo Video](your_video_link)
+```
+
+---
+
+## Future Improvements
+
+* Multi-shop switching
+* Offline POS mode
+* GST / tax automation
+* Barcode scanning
+* Mobile PWA support
+* Email / WhatsApp invoice sending
+* Advanced analytics dashboard
+
+---
+
+## Author
+
+Ankur Singh
