@@ -1,23 +1,17 @@
-# ShopManager — Multi-Tenant POS & Shop Management SaaS
+# 🏪 ShopManager - Multi-Tenant POS & Business Management System
+
+A production-grade, full-stack Point of Sale (POS) and business management system built for the Lingo.dev hackathon. Built with Next.js 14, TypeScript, Supabase, and shadcn/ui.
+
+[![Watch the video](https://img.youtube.com/vi/0hHslCvAye8/maxresdefault.jpg)](https://youtu.be/0hHslCvAye8)
 
 <p align="center">
-  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js"/></a>
-  &nbsp;
-  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"/></a>
-  &nbsp;
-  <a href="https://lingo.dev"><img src="https://img.shields.io/badge/Lingo.dev-i18n-6366F1?style=for-the-badge&logo=translate&logoColor=white" alt="Lingo.dev"/></a>
-  &nbsp;
-  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/></a>
-  &nbsp;
-  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/></a>
+  <img src="public/assets/1.png" alt="Logo 1" height="80" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="public/assets/2.png" alt="Logo 2" height="80" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="public/assets/3.png" alt="Logo 3" height="80" />
 </p>
 
-**ShopManager** is a **multi-tenant POS & shop management SaaS** built with **Next.js, Supabase, and Lingo.dev**.  
-It enables businesses to manage **sales, inventory, analytics, and billing** with secure **tenant isolation and role-based access**.
-
-Built for **Lingo.dev Hackathon 2026**.
-
----
 
 ## Features
 
