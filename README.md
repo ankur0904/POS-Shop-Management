@@ -2,178 +2,282 @@
 
 A production-grade, full-stack Point of Sale (POS) and business management system built for the Lingo.dev hackathon. Built with Next.js 14, TypeScript, Supabase, and shadcn/ui.
 
-[![Watch the video](https://img.youtube.com/vi/0hHslCvAye8/maxresdefault.jpg)](https://youtu.be/0hHslCvAye8)
+## 🎯 Features
 
-<p align="center">
-  <img src="public/assets/1.png" alt="Logo 1" height="80" />
-  &nbsp;&nbsp;&nbsp;
-  <img src="public/assets/2.png" alt="Logo 2" height="80" />
-  &nbsp;&nbsp;&nbsp;
-  <img src="public/assets/3.png" alt="Logo 3" height="80" />
-</p>
+### 🔐 **Multi-Tenant Architecture**
+- Each shop gets isolated, secure data
+- Shop owner registration and management
+- Role-based access control (Admin, Cashier, Inventory Manager)
 
+### 🛒 **Point of Sale (POS)**
+- Fast, intuitive billing interface
+- Real-time product search (by name, SKU, or barcode)
+- Shopping cart with quantity management
+- Multiple payment methods (Cash, Card, UPI, Digital)
+- Automatic stock deduction on sale
+- Invoice generation
 
-## Features
-
-- Multi-tenant architecture (per-shop isolation)
-- Role-based access (Admin, Cashier, Inventory Manager)
-- POS system with cart and checkout
-- Inventory management with stock tracking
-- Sales history with invoice generation (PDF)
-- Revenue analytics and charts
-- Low-stock alerts
-- Internationalization (English ↔ Hindi via Lingo.dev)
-- Secure authentication using Supabase + RLS
-- Fully responsive UI
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|------|------------|
-| Framework | Next.js (App Router) |
-| Language | TypeScript |
-| Backend | Supabase (Postgres + Auth + RLS) |
-| State | Zustand |
-| Styling | Tailwind CSS |
-| UI | shadcn/ui + Radix |
-| Validation | Zod + React Hook Form |
-| Charts | Recharts |
-| i18n | Lingo.dev |
-| PDF | jsPDF |
-
----
-
-## Architecture Overview
-
-```
-
-Next.js (App Router)
-├── Server Actions (Auth, Products, Sales, Analytics, Settings)
-├── Supabase (Postgres + RLS + Auth)
-├── Zustand (Shop + Cart state)
-├── Multi-tenant via shop_id
-└── Lingo.dev i18n layer
-
-````
-
----
-
-## Core Modules
-
-### Authentication & Multi-Tenancy
-- Shop owner signup creates shop automatically
-- Role-based access
-- Secure middleware route protection
-
-### POS
-- Fast checkout flow
-- Zustand-powered cart
-- Invoice and receipt generation
-
-### Inventory
-- Product CRUD
+### 📦 **Inventory Management**
+- Product CRUD operations with categories
+- SKU and barcode support
+- Stock tracking with low-stock alerts
+- Stock adjustment history/audit logs
 - Category management
-- Stock adjustments with audit logs
-- Low-stock alerts
+- Bulk operations
 
-### Sales
-- Full transaction history
-- Sequential invoice numbers via database
-- CSV export and PDF receipts
+### 📊 **Analytics & Reports**
+- Real-time dashboard with key metrics
+- Sales trends (daily, weekly, monthly)
+- Revenue tracking and charts
+- Top-selling products analysis  
+- Low stock alerts
+- Custom date range reports
 
-### Analytics
-- Revenue charts
-- Top-selling products
-- Daily / monthly statistics
+### 🧾 **Sales Management**
+- Complete sales history
+- Invoice viewing and management
+- Customer information tracking
+- Payment method tracking
+- Sale status management
 
----
+### 🔒 **Security Features**
+- Row Level Security (RLS) policies in Supabase
+- Tenant isolation at database level
+- Role-based permissions
+- Secure authentication with Supabase Auth
+- Protected API routes
+- Middleware authentication
 
-## Database (Supabase)
+## 🛠️ Tech Stack
 
-- Multi-tenant using `shop_id`
-- Row Level Security enabled
-- Inventory triggers prevent negative stock
-- Sequential invoice numbering (`INV-YYYYMM-XXXX`)
-- Full audit trail for stock changes
+### **Frontend**
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: TailwindCSS v4
+- **UI Components**: shadcn/ui
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **State Management**: Zustand
+- **Date Handling**: date-fns
 
----
+### **Backend**
+- **BaaS**: Supabase
+  - PostgreSQL Database
+  - Authentication
+  - Row Level Security
+  - Real-time subscriptions
+  - Storage (for future invoice PDFs)
 
-## Internationalization (Lingo.dev)
+### **Database**
+- PostgreSQL with advanced features:
+  - Triggers for automatic stock updates
+  - Functions for invoice number generation
+  - Comprehensive RLS policies
+  - Indexes for performance
+  - Audit trails
 
-- Automatic translation (English → Hindi)
-- Runtime language switching
-- Cached translation files
-- Compiler-driven extraction
+## 📋 Prerequisites
 
----
+- Node.js 18+ and npm
+- Supabase account
+- Git
 
-## Getting Started
+## 🚀 Getting Started
 
-### Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone <your-repo-url>
-cd shopmanager
-````
+cd business-management
+```
 
-### Install Dependencies
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### Setup Environment Variables
+### 3. Setup Supabase
 
-Create `.env.local`
+1. Go to [https://app.supabase.com](https://app.supabase.com)
+2. Create a new project
+3. Go to **Project Settings** → **API**
+4. Copy your:
+   - **Project URL**
+   - **anon/public key**
 
+### 4. Configure Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
-NEXT_PUBLIC_SUPABASE_URL=your_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
 
-### Run Development Server
+### 5. Setup Database Schema
+
+1. Go to Supabase Dashboard → **SQL Editor**
+2. Create a new query
+3. Copy the entire content from `supabase/schema.sql`
+4. Paste and run the SQL
+
+This will create:
+- All tables (shops, products, sales, etc.)
+- Row Level Security policies
+- Database functions and triggers
+- Indexes for performance
+
+### 6. Run the Development Server
 
 ```bash
 npm run dev
 ```
 
----
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Hackathon Notes
+### 7. Create Your First Shop
 
-* Built from scratch during Lingo.dev Hackathon
-* Uses Lingo.dev for real-world i18n implementation
-* Clean commit history
-* Production-grade multi-tenant architecture
-* Secure Supabase RLS design
+1. Click **"Get Started"** or **"Register"**
+2. Fill in:
+   - Full Name
+   - Shop Name
+   - Email
+   - Password
+3. You'll be auto-logged in to your dashboard!
 
----
-
-## Demo
-
-Add your demo video link here:
+## 📁 Project Structure
 
 ```
-[Demo Video](your_video_link)
+business-management/
+├── app/
+│   ├── actions/          # Server actions
+│   │   ├── auth.ts       # Authentication actions
+│   │   ├── products.ts   # Inventory actions
+│   │   ├── sales.ts      # Sales actions
+│   │   └── analytics.ts  # Analytics actions
+│   ├── dashboard/        # Dashboard page
+│   ├── pos/              # Point of Sale page
+│   ├── inventory/        # Inventory management page
+│   ├── sales/            # Sales history page
+│   ├── analytics/        # Analytics page
+│   ├── login/            # Login page
+│   ├── register/         # Registration page
+│   ├── layout.tsx        # Root layout
+│   ├── page.tsx          # Landing page
+│   └── globals.css       # Global styles
+├── components/
+│   ├── ui/               # shadcn/ui components
+│   └── dashboard-layout.tsx  # Main dashboard layout
+├── hooks/
+│   └── use-auth.ts       # Authentication hooks
+├── lib/
+│   ├── supabase/         # Supabase clients
+│   │   ├── client.ts     # Browser client
+│   │   └── server.ts     # Server client
+│   ├── store/            # Zustand stores
+│   │   ├── cart-store.ts # POS cart state
+│   │   └── shop-store.ts # Shop state
+│   └── utils.ts          # Utility functions
+├── types/
+│   └── database.types.ts # TypeScript types
+├── supabase/
+│   └── schema.sql        # Database schema
+├── middleware.ts         # Next.js middleware
+└── package.json
 ```
 
+## 🔑 Key Features Explained
+
+### Multi-Tenancy
+
+Each shop is completely isolated:
+- Shop owners register and get their own space
+- All data is filtered by `shop_id`
+- RLS policies ensure data security
+- Users can belong to multiple shops with different roles
+
+### Role-Based Access Control
+
+Three role types:
+- **Admin**: Full access to everything
+- **Cashier**: Can process sales, view inventory
+- **Inventory Manager**: Can manage products and stock
+
+### Database Triggers
+
+Automatic processes:
+- Stock deduction on sale creation
+- Inventory logging for audit trails
+- Negative stock prevention
+- Auto-generated invoice numbers
+
+### Performance Optimizations
+
+- Database indexes on frequently queried columns
+- Server-side rendering where applicable
+- Optimized SQL queries
+- Efficient state management with Zustand
+
+## 📸 Screenshots
+
+### Landing Page
+Beautiful hero section with feature highlights
+
+### Dashboard
+Real-time metrics, charts, and recent sales
+
+### POS System
+Fast billing with product search and cart management
+
+### Inventory Management
+Product management with categories and stock tracking
+
+### Analytics
+Comprehensive business insights with interactive charts
+
+## 🔐 Security
+
+- ✅ Row Level Security (RLS) on all tables
+- ✅ Server-side authentication checks
+- ✅ Protected API routes
+- ✅ Tenant isolation at database level
+- ✅ SQL injection prevention
+- ✅ XSS protection
+- ✅ CSRF protection via Next.js
+
+## 🚧 Future Enhancements
+
+- [ ] PDF invoice generation and download
+- [ ] Email invoice sending
+- [ ] Multi-currency support
+- [ ] Barcode scanner integration
+- [ ] Customer loyalty program
+- [ ] Supplier management
+- [ ] Purchase orders
+- [ ] Multi-location support
+- [ ] Mobile app (React Native)
+- [ ] Print receipt functionality
+- [ ] Expense tracking
+- [ ] Employee attendance
+- [ ] Tax calculation automation
+
+## 📝 License
+
+This project was built for the Lingo.dev Hackathon (Feb 16-23, 2026)
+
+## 🙏 Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Powered by [Supabase](https://supabase.com/)
+- UI by [shadcn/ui](https://ui.shadcn.com/)
+- Icons by [Lucide](https://lucide.dev/)
+
+## 📧 Contact
+
+For questions or feedback, reach out via the hackathon platform.
+
 ---
 
-## Future Improvements
-
-* Multi-shop switching
-* Offline POS mode
-* GST / tax automation
-* Barcode scanning
-* Mobile PWA support
-* Email / WhatsApp invoice sending
-* Advanced analytics dashboard
-
----
-
-## Author
-
-Ankur Singh
+**Built with ❤️ for the Lingo.dev Hackathon 🚀**
