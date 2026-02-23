@@ -152,13 +152,6 @@ npm run dev
 
 ---
 
-## Demo
-
-Add your demo video link here:
-
-```
-[Demo Video](your_video_link)
-```
 
 ---
 
