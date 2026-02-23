@@ -8,8 +8,10 @@ import { getDashboardStats, getRecentSales, getSalesChartData } from '@/app/acti
 import { DollarSign, ShoppingCart, Package, AlertTriangle } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatDistanceToNow } from 'date-fns'
+import { de, enUS, es, fr } from 'date-fns/locale'
 import { getCurrencySymbol } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/loading-skeletons'
+import { useLingoContext } from '@lingo.dev/compiler/react'
 
 interface CustomTooltipProps {
   active?: boolean
@@ -36,10 +38,19 @@ const CustomTooltip = ({ active, payload, label, currencySymbol }: CustomTooltip
 
 export default function DashboardPage() {
   const { shop } = useCurrentShop()
+  const { locale } = useLingoContext()
   const [stats, setStats] = useState<any>(null)
   const [recentSales, setRecentSales] = useState<any[]>([])
   const [chartData, setChartData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  const dateLocale = locale.startsWith('fr')
+    ? fr
+    : locale.startsWith('es')
+      ? es
+      : locale.startsWith('de')
+        ? de
+        : enUS
 
   useEffect(() => {
     if (shop) {
@@ -193,10 +204,10 @@ export default function DashboardPage() {
                       <div>
                         <p className="font-medium text-sm">{sale.invoice_number}</p>
                         <p className="text-xs sm:text-sm text-gray-500">
-                          {sale.customer_name || 'Walk-in Customer'}
+                          {sale.customer_name ? sale.customer_name : <>Walk-in Customer</>}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {formatDistanceToNow(new Date(sale.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(sale.created_at), { addSuffix: true, locale: dateLocale })}
                         </p>
                       </div>
                       <div className="text-right">
