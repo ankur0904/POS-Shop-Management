@@ -55,14 +55,29 @@ export async function signup(formData: FormData) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-  const { error: shopError } = await adminClient.from("shops").insert({
-    name: shopName,
-    slug: shopSlug,
-    owner_id: authData.user.id,
+  const { data: newShop, error: shopError } = await adminClient
+    .from("shops")
+    .insert({
+      name: shopName,
+      slug: shopSlug,
+      owner_id: authData.user.id,
+    })
+    .select("id")
+    .single();
+
+  if (shopError || !newShop) {
+    return { error: "Failed to create shop: " + (shopError?.message || "Unknown error") };
+  }
+
+  // Create admin role for the new shop owner
+  const { error: roleError } = await adminClient.from("user_roles").insert({
+    shop_id: newShop.id,
+    user_id: authData.user.id,
+    role: "admin",
   });
 
-  if (shopError) {
-    return { error: "Failed to create shop: " + shopError.message };
+  if (roleError) {
+    console.error("Failed to create user role:", roleError.message);
   }
 
   // Now sign in the user with regular client
