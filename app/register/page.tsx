@@ -2,23 +2,33 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { signup } from '@/app/actions/auth'
-import { Mail } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const supabase = createClient()
+
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setError(null)
     setLoading(true)
 
-    // Validate password match
+    const fullName = formData.get('fullName') as string
+    const shopName = formData.get('shopName') as string
+    const email = formData.get('email') as string
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirmPassword') as string
 
@@ -28,126 +38,124 @@ export default function RegisterPage() {
       return
     }
 
-    const result = await signup(formData)
+    try {
+      // =========================
+      // 1. Sign up user (NO EMAIL CONFIRMATION)
+      // =========================
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      })
 
-    if (result?.error) {
-      setError(result.error)
-      setLoading(false)
-    } else if (result?.success) {
-      setEmailSent(true)
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+        return
+      }
+
+      const user = data.user
+      if (!user) {
+        setError('User creation failed')
+        setLoading(false)
+        return
+      }
+
+      // =========================
+      // 2. Create Shop
+      // =========================
+      const { data: shop, error: shopError } = await supabase
+        .from('shops')
+        .insert({
+          name: shopName,
+          slug: shopName.toLowerCase().replace(/\s+/g, '-'),
+          owner_id: user.id,
+          currency: 'INR',
+        })
+        .select()
+        .single()
+
+      if (shopError || !shop) {
+        setError('Shop creation failed')
+        setLoading(false)
+        return
+      }
+
+      // =========================
+      // 3. Create user role (admin)
+      // =========================
+      await supabase.from('user_roles').insert({
+        shop_id: shop.id,
+        user_id: user.id,
+        role: 'admin',
+      })
+
+      // =========================
+      // 4. Store local session info
+      // =========================
+      localStorage.removeItem('shop-storage')
+
+      localStorage.setItem('user_id', user.id)
+      localStorage.setItem('user_email', email)
+      localStorage.setItem('active_shop_id', shop.id)
+      localStorage.setItem('user_role', 'admin')
+
+      console.log('User + Shop created')
+
+      // =========================
+      // 5. Redirect
+      // =========================
+      window.location.href = '/dashboard'
+    } catch (err) {
+      console.error(err)
+      setError('Unexpected error occurred')
       setLoading(false)
     }
-  }
-
-  // Show success message after signup
-  if (emailSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-              <Mail className="h-8 w-8 text-blue-600" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Check Your Email</CardTitle>
-            <CardDescription className="text-base">
-              We&apos;ve sent a verification link to your email address. Please click the link to verify your account and get started.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 text-sm text-blue-700">
-              <p className="font-medium mb-1">Didn&apos;t receive the email?</p>
-              <ul className="list-disc list-inside space-y-1 text-blue-600">
-                <li>Check your spam or junk folder</li>
-                <li>Make sure you entered the correct email</li>
-                <li>Try registering again after a few minutes</li>
-              </ul>
-            </div>
-            <div className="text-center">
-              <Link href="/login" className="text-blue-600 hover:underline font-medium text-sm">
-                ← Back to Sign In
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Create Account</CardTitle>
           <CardDescription className="text-center">
             Register your shop and start managing your business
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form action={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="John Doe"
-                required
-                disabled={loading}
-              />
+            <div>
+              <Label>Full Name</Label>
+              <Input name="fullName" required disabled={loading} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="shopName">Shop Name</Label>
-              <Input
-                id="shopName"
-                name="shopName"
-                type="text"
-                placeholder="My Awesome Shop"
-                required
-                disabled={loading}
-              />
+            <div>
+              <Label>Shop Name</Label>
+              <Input name="shopName" required disabled={loading} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                required
-                disabled={loading}
-              />
+            <div>
+              <Label>Email</Label>
+              <Input name="email" type="email" required disabled={loading} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                minLength={6}
-                required
-                disabled={loading}
-              />
+            <div>
+              <Label>Password</Label>
+              <Input name="password" type="password" minLength={6} required disabled={loading} />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                minLength={6}
-                required
-                disabled={loading}
-              />
+            <div>
+              <Label>Confirm Password</Label>
+              <Input name="confirmPassword" type="password" minLength={6} required disabled={loading} />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded">
                 {error}
               </div>
             )}
@@ -157,10 +165,10 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">Already have an account? </span>
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
-              Sign in here
+          <div className="mt-4 text-center text-sm">
+            <span>Already have an account? </span>
+            <Link href="/login" className="text-blue-600 underline">
+              Sign in
             </Link>
           </div>
         </CardContent>
@@ -168,4 +176,3 @@ export default function RegisterPage() {
     </div>
   )
 }
-

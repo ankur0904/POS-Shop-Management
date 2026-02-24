@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,7 @@ export default function InventoryPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [adjustStockProduct, setAdjustStockProduct] = useState<Product | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [debugInfo, setDebugInfo] = useState<any>(null)
 
   const canEdit = role === 'admin' || role === 'inventory_manager'
 
@@ -146,13 +148,45 @@ export default function InventoryPage() {
     if (!shop || !canEdit) return
 
     const formData = new FormData(e.currentTarget)
-    const result = await createCategory(shop.id, {
+    const categoryData = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
-    })
+    }
 
-    if (result.error) {
-      toast.error(result.error)
+    // DEBUG START
+    const supabase = createClient()
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+
+    const payload = {
+      shop_id: shop.id,
+      ...categoryData
+    }
+
+    const { data: insertResult, error: insertError } = await supabase
+      .from("categories")
+      .insert(payload)
+      .select()
+
+    const debug = {
+      SESSION: sessionData,
+      SESSION_ERROR: sessionError,
+      USER: userData,
+      USER_ERROR: userError,
+      JWT: sessionData?.session?.access_token,
+      INSERT_PAYLOAD: payload,
+      INSERT_RESULT: insertResult,
+      INSERT_ERROR: insertError,
+      SHOP_ID_USED: shop.id,
+      IS_LOGGED__BEFORE_INSERT: !!userData?.user
+    }
+
+    console.log("DEBUG_DATA:", JSON.stringify(debug, null, 2))
+    setDebugInfo(debug)
+    // DEBUG END
+
+    if (insertError) {
+      toast.error(insertError.message)
     } else {
       toast.success('Category created')
       setCategoryDialogOpen(false)
@@ -440,62 +474,62 @@ export default function InventoryPage() {
                   </TableRow>
                 ) : (
                   filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-mono text-xs sm:text-sm">{product.sku}</TableCell>
-                    <TableCell className="font-medium text-xs sm:text-sm">{product.name}</TableCell>
-                    <TableCell className="text-xs sm:text-sm">{(product as any).category?.name || '-'}</TableCell>
-                    <TableCell className="text-xs sm:text-sm">
-                      {getCurrencySymbol(shop?.currency)} {product.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          product.stock_quantity === 0
-                            ? 'destructive'
-                            : product.stock_quantity < product.low_stock_threshold
-                            ? 'default'
-                            : 'secondary'
-                        }
-                      >
-                        {product.stock_quantity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {product.stock_quantity === 0 ? (
-                        <Badge variant="destructive">Out of Stock</Badge>
-                      ) : product.stock_quantity < product.low_stock_threshold ? (
-                        <Badge className="bg-orange-500">Low Stock</Badge>
-                      ) : (
-                        <Badge variant="secondary">In Stock</Badge>
-                      )}
-                    </TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="cursor-pointer"
-                            onClick={() => {
-                              setEditingProduct(product)
-                              setDialogOpen(true)
-                            }}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="cursor-pointer"
-                            onClick={() => setAdjustStockProduct(product)}
-                          >
-                            <Package className="h-3 w-3" />
-                          </Button>
-                        </div>
+                    <TableRow key={product.id}>
+                      <TableCell className="font-mono text-xs sm:text-sm">{product.sku}</TableCell>
+                      <TableCell className="font-medium text-xs sm:text-sm">{product.name}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">{(product as any).category?.name || '-'}</TableCell>
+                      <TableCell className="text-xs sm:text-sm">
+                        {getCurrencySymbol(shop?.currency)} {product.price.toFixed(2)}
                       </TableCell>
-                    )}
-                  </TableRow>
-                ))
+                      <TableCell>
+                        <Badge
+                          variant={
+                            product.stock_quantity === 0
+                              ? 'destructive'
+                              : product.stock_quantity < product.low_stock_threshold
+                                ? 'default'
+                                : 'secondary'
+                          }
+                        >
+                          {product.stock_quantity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {product.stock_quantity === 0 ? (
+                          <Badge variant="destructive">Out of Stock</Badge>
+                        ) : product.stock_quantity < product.low_stock_threshold ? (
+                          <Badge className="bg-orange-500">Low Stock</Badge>
+                        ) : (
+                          <Badge variant="secondary">In Stock</Badge>
+                        )}
+                      </TableCell>
+                      {canEdit && (
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="cursor-pointer"
+                              onClick={() => {
+                                setEditingProduct(product)
+                                setDialogOpen(true)
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="cursor-pointer"
+                              onClick={() => setAdjustStockProduct(product)}
+                            >
+                              <Package className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
@@ -529,6 +563,13 @@ export default function InventoryPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* DEBUG DISPLAY */}
+      {debugInfo && (
+        <div id="debug-output" style={{ display: 'none' }}>
+          {JSON.stringify(debugInfo)}
+        </div>
+      )}
     </DashboardLayout>
   )
 }
