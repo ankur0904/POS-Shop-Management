@@ -24,6 +24,7 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
+  const supabase = await createClient();
   const adminClient = createAdminClient();
 
   const email = formData.get("email") as string;
@@ -31,13 +32,16 @@ export async function signup(formData: FormData) {
   const fullName = formData.get("fullName") as string;
   const shopName = formData.get("shopName") as string;
 
-  // Create user with admin client and auto-confirm email
-  const { error, data: authData } = await adminClient.auth.admin.createUser({
+  // Use regular signUp - this sends a verification email
+  // when "Confirm email" is enabled in Supabase settings
+  const { error, data: authData } = await supabase.auth.signUp({
     email,
     password,
-    email_confirm: true, // Auto-confirm email
-    user_metadata: {
-      full_name: fullName,
+    options: {
+      data: {
+        full_name: fullName,
+      },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
     },
   });
 
@@ -49,7 +53,7 @@ export async function signup(formData: FormData) {
     return { error: "Failed to create user" };
   }
 
-  // Create shop for the new user
+  // Create shop for the new user (using admin client to bypass RLS)
   const shopSlug = shopName
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -80,19 +84,8 @@ export async function signup(formData: FormData) {
     console.error("Failed to create user role:", roleError.message);
   }
 
-  // Now sign in the user with regular client
-  const supabase = await createClient();
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (signInError) {
-    return { error: "User created but login failed: " + signInError.message };
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/dashboard");
+  // Return success - user needs to verify email before logging in
+  return { success: true };
 }
 
 export async function logout() {
