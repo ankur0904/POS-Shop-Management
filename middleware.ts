@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     "/analytics",
     "/settings",
   ];
-  const authRoutes = ["/login", "/register"];
+  const authRoutes = ["/login", "/register", "/auth/callback"];
 
   const isProtectedRoute = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route),

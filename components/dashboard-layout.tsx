@@ -6,11 +6,11 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { 
-  LayoutDashboard, 
-  ShoppingCart, 
-  Package, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  BarChart3,
   Settings,
   LogOut,
   Store,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { useAuth, useCurrentShop } from '@/hooks/use-auth'
+import LanguageSwitcher from './ui/language-switcher'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -53,18 +54,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -75,6 +79,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+
 
       {/* Sidebar */}
       <div className={cn(
@@ -149,6 +154,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <div className="pt-16 lg:pt-0 lg:pl-64">
+        {/* Desktop Top Bar */}
+        <div className="hidden lg:flex items-center justify-end sticky top-0 z-30 border-b border-gray-200 bg-white/80 px-8 py-3 backdrop-blur dark:border-gray-700 dark:bg-background/80">
+          <LanguageSwitcher />
+        </div>
         <main className="p-4 sm:p-6 lg:p-8">
           {children}
         </main>
