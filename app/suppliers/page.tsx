@@ -28,6 +28,7 @@ import { getSuppliers, createSupplier, updateSupplier, deleteSupplier } from '@/
 import { Supplier } from '@/types/database.types'
 import { Plus, Search, Edit, Trash2, Building2, Phone, Mail, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
+import { SuppliersSkeleton } from '@/components/loading-skeletons'
 
 export default function SuppliersPage() {
   const { shop, loading: authLoading } = useCurrentShop()
@@ -146,12 +147,7 @@ export default function SuppliersPage() {
   if (authLoading || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading suppliers...</p>
-          </div>
-        </div>
+        <SuppliersSkeleton />
       </DashboardLayout>
     )
   }
@@ -168,7 +164,7 @@ export default function SuppliersPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-4 lg:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-3xl font-bold">Suppliers</h1>

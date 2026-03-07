@@ -52,6 +52,7 @@ import {
   Package,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { PurchasesSkeleton } from '@/components/loading-skeletons'
 
 interface PurchaseItem {
   product_id: string
@@ -323,12 +324,7 @@ export default function PurchasesPage() {
   if (authLoading || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading purchases...</p>
-          </div>
-        </div>
+        <PurchasesSkeleton />
       </DashboardLayout>
     )
   }
@@ -347,7 +343,7 @@ export default function PurchasesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-4 lg:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-3xl font-bold">Purchase Orders</h1>

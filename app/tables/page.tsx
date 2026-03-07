@@ -34,6 +34,7 @@ import {
 import { RestaurantTable, TableStatus } from '@/types/database.types'
 import { Plus, Edit, Trash2, Users, Table2, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { TablesSkeleton } from '@/components/loading-skeletons'
 
 export default function TablesPage() {
   const { shop, loading: authLoading } = useCurrentShop()
@@ -169,12 +170,7 @@ export default function TablesPage() {
   if (authLoading || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading tables...</p>
-          </div>
-        </div>
+        <TablesSkeleton />
       </DashboardLayout>
     )
   }
@@ -199,7 +195,7 @@ export default function TablesPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-4 lg:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -219,9 +215,9 @@ export default function TablesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Available</p>
-                  <p className="text-2xl font-bold text-green-600">{tablesByStatus.available.length}</p>
+                  <p className="text-2xl font-bold">{tablesByStatus.available.length}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
+                <CheckCircle className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -231,9 +227,9 @@ export default function TablesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Occupied</p>
-                  <p className="text-2xl font-bold text-red-600">{tablesByStatus.occupied.length}</p>
+                  <p className="text-2xl font-bold">{tablesByStatus.occupied.length}</p>
                 </div>
-                <Users className="h-8 w-8 text-red-600" />
+                <Users className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -243,9 +239,9 @@ export default function TablesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Reserved</p>
-                  <p className="text-2xl font-bold text-yellow-600">{tablesByStatus.reserved.length}</p>
+                  <p className="text-2xl font-bold">{tablesByStatus.reserved.length}</p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-600" />
+                <Clock className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -255,9 +251,9 @@ export default function TablesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Maintenance</p>
-                  <p className="text-2xl font-bold text-gray-600">{tablesByStatus.maintenance.length}</p>
+                  <p className="text-2xl font-bold">{tablesByStatus.maintenance.length}</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-gray-600" />
+                <AlertCircle className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>

@@ -146,7 +146,7 @@ export default function ReportsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-6 p-4 md:p-4">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold">Advanced Reports</h1>
@@ -214,11 +214,11 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Total Revenue</p>
-                          <p className="text-2xl font-bold text-green-600">
+                          <p className="text-2xl font-bold">
                             {formatCurrency(profitLossData.totalRevenue)}
                           </p>
                         </div>
-                        <DollarSign className="h-8 w-8 text-green-600" />
+                        <DollarSign className="h-8 w-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -228,11 +228,11 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Total Cost</p>
-                          <p className="text-2xl font-bold text-red-600">
+                          <p className="text-2xl font-bold">
                             {formatCurrency(profitLossData.totalCost)}
                           </p>
                         </div>
-                        <TrendingDown className="h-8 w-8 text-red-600" />
+                        <TrendingDown className="h-8 w-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -242,7 +242,7 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Gross Profit</p>
-                          <p className="text-2xl font-bold text-blue-600">
+                          <p className="text-2xl font-bold">
                             {formatCurrency(profitLossData.totalProfit)}
                           </p>
                         </div>
@@ -260,7 +260,7 @@ export default function ReportsPage() {
                             {formatPercentage(profitLossData.profitMargin)}
                           </p>
                         </div>
-                        <Receipt className="h-8 w-8 text-gray-600" />
+                        <Receipt className="h-8 w-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -283,27 +283,27 @@ export default function ReportsPage() {
                       </div>
                       <div className="flex justify-between text-sm border-b pb-2">
                         <span className="text-gray-600">Total Cost:</span>
-                        <span className="font-medium text-red-600">
+                        <span className="font-medium">
                           -{formatCurrency(profitLossData.totalCost)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm border-b pb-2">
                         <span className="text-gray-600">Total Tax:</span>
-                        <span className="font-medium text-red-600">
+                        <span className="font-medium">
                           -{formatCurrency(profitLossData.totalTax)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm border-b pb-2">
                         <span className="text-gray-600">Total Discounts Given:</span>
-                        <span className="font-medium text-red-600">
+                        <span className="font-medium">
                           -{formatCurrency(profitLossData.totalDiscount)}
                         </span>
                       </div>
                       <Separator />
-                      <div className="flex justify-between text-lg font-bold pt-2">
-                        <span>Net Profit:</span>
+                      <div className="flex justify-between text-sm border-b pb-2">
+                        <span className="text-gray-600">Net Profit:</span>
                         <span
-                          className={profitLossData.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}
+                          className={profitLossData.totalProfit >= 0 ? 'font-medium text-green-600' : 'font-medium'}
                         >
                           {formatCurrency(profitLossData.totalProfit)}
                         </span>
@@ -325,7 +325,7 @@ export default function ReportsPage() {
                     <CardContent className="pt-6">
                       <div>
                         <p className="text-sm text-gray-600">Total CGST Collected</p>
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold">
                           {formatCurrency(gstData.totalCGST)}
                         </p>
                       </div>
@@ -336,7 +336,7 @@ export default function ReportsPage() {
                     <CardContent className="pt-6">
                       <div>
                         <p className="text-sm text-gray-600">Total SGST Collected</p>
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold">
                           {formatCurrency(gstData.totalSGST)}
                         </p>
                       </div>
@@ -347,7 +347,7 @@ export default function ReportsPage() {
                     <CardContent className="pt-6">
                       <div>
                         <p className="text-sm text-gray-600">Total GST</p>
-                        <p className="text-2xl font-bold text-green-600">
+                        <p className="text-2xl font-bold">
                           {formatCurrency(gstData.totalGST)}
                         </p>
                       </div>
@@ -533,11 +533,11 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Total Retail Value</p>
-                          <p className="text-2xl font-bold text-green-600">
+                          <p className="text-2xl font-bold">
                             {formatCurrency(inventoryData.totalRetailValue)}
                           </p>
                         </div>
-                        <DollarSign className="h-8 w-8 text-green-600" />
+                        <DollarSign className="h-8 w-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -547,11 +547,11 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Potential Profit</p>
-                          <p className="text-2xl font-bold text-purple-600">
+                          <p className="text-2xl font-bold">
                             {formatCurrency(inventoryData.potentialProfit)}
                           </p>
                         </div>
-                        <TrendingUp className="h-8 w-8 text-purple-600" />
+                        <TrendingUp className="h-8 w-8 text-blue-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -561,11 +561,11 @@ export default function ReportsPage() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-gray-600">Out of Stock</p>
-                          <p className="text-2xl font-bold text-red-600">
+                          <p className="text-2xl font-bold">
                             {inventoryData.outOfStockCount}
                           </p>
                         </div>
-                        <AlertTriangle className="h-8 w-8 text-red-600" />
+                        <AlertTriangle className="h-8 w-8 text-orange-600" />
                       </div>
                     </CardContent>
                   </Card>
@@ -590,14 +590,14 @@ export default function ReportsPage() {
                       </div>
                       <div className="flex justify-between text-sm border-b pb-2">
                         <span className="text-gray-600">Retail Value (if all sold):</span>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium">
                           {formatCurrency(inventoryData.totalRetailValue)}
                         </span>
                       </div>
                       <Separator />
-                      <div className="flex justify-between text-lg font-bold">
-                        <span>Potential Profit:</span>
-                        <span className="text-green-600">
+                      <div className="flex justify-between text-sm border-b pb-2">
+                        <span className="text-gray-600">Potential Profit:</span>
+                        <span className="font-medium text-green-600">
                           {formatCurrency(inventoryData.potentialProfit)}
                         </span>
                       </div>
