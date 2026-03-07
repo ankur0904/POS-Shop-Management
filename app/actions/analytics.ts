@@ -189,3 +189,292 @@ export async function getRecentSales(shopId: string, limit = 5) {
 
   return { data, error: null };
 }
+
+// =====================================================
+// ADVANCED REPORTING - Profit & Loss
+// =====================================================
+
+export async function getProfitLossReport(
+  shopId: string,
+  startDate: string,
+  endDate: string
+) {
+  const supabase = await createClient();
+
+  // Get all sales with items and product costs
+  const { data: sales, error } = await supabase
+    .from("sales")
+    .select(`
+      id,
+      subtotal,
+      tax_amount,
+      cgst_amount,
+      sgst_amount,
+      discount_amount,
+      total_amount,
+      created_at,
+      sale_items (
+        quantity,
+        unit_price,
+        subtotal,
+        product:products (
+          cost_price
+        )
+      )
+    `)
+    .eq("shop_id", shopId)
+    .eq("status", "completed")
+    .gte("created_at", startDate)
+    .lte("created_at", endDate);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  let totalRevenue = 0;
+  let totalCost = 0;
+  let totalProfit = 0;
+  let totalTax = 0;
+  let totalDiscount = 0;
+
+  sales?.forEach((sale: any) => {
+    totalRevenue += Number(sale.total_amount);
+    totalTax += Number(sale.tax_amount || 0);
+    totalDiscount += Number(sale.discount_amount || 0);
+
+    sale.sale_items?.forEach((item: any) => {
+      const costPrice = item.product?.cost_price || 0;
+      const itemCost = costPrice * item.quantity;
+      totalCost += itemCost;
+    });
+  });
+
+  totalProfit = totalRevenue - totalCost - totalTax;
+
+  return {
+    data: {
+      totalRevenue,
+      totalCost,
+      totalProfit,
+      totalTax,
+      totalDiscount,
+      profitMargin: totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0,
+      salesCount: sales?.length || 0,
+    },
+    error: null,
+  };
+}
+
+// =====================================================
+// GST Report
+// =====================================================
+
+export async function getGSTReport(
+  shopId: string,
+  startDate: string,
+  endDate: string
+) {
+  const supabase = await createClient();
+
+  const { data: sales, error } = await supabase
+    .from("sales")
+    .select("subtotal, cgst_amount, sgst_amount, cgst_percentage, sgst_percentage, total_amount")
+    .eq("shop_id", shopId)
+    .eq("status", "completed")
+    .gte("created_at", startDate)
+    .lte("created_at", endDate);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Group by GST rate
+  const gstBreakdown: any = {};
+
+  sales?.forEach((sale: any) => {
+    const gstRate = Number(sale.cgst_percentage || 0) + Number(sale.sgst_percentage || 0);
+    const key = gstRate.toString();
+
+    if (!gstBreakdown[key]) {
+      gstBreakdown[key] = {
+        gstRate,
+        cgstRate: Number(sale.cgst_percentage || 0),
+        sgstRate: Number(sale.sgst_percentage || 0),
+        taxableAmount: 0,
+        cgstAmount: 0,
+        sgstAmount: 0,
+        totalGST: 0,
+        salesCount: 0,
+      };
+    }
+
+    gstBreakdown[key].taxableAmount += Number(sale.subtotal || 0);
+    gstBreakdown[key].cgstAmount += Number(sale.cgst_amount || 0);
+    gstBreakdown[key].sgstAmount += Number(sale.sgst_amount || 0);
+    gstBreakdown[key].totalGST += Number(sale.cgst_amount || 0) + Number(sale.sgst_amount || 0);
+    gstBreakdown[key].salesCount += 1;
+  });
+
+  const breakdown = Object.values(gstBreakdown);
+  const totalCGST = breakdown.reduce((sum: number, item: any) => sum + item.cgstAmount, 0);
+  const totalSGST = breakdown.reduce((sum: number, item: any) => sum + item.sgstAmount, 0);
+  const totalGST = totalCGST + totalSGST;
+
+  return {
+    data: {
+      breakdown,
+      totalCGST,
+      totalSGST,
+      totalGST,
+      totalSales: sales?.length || 0,
+    },
+    error: null,
+  };
+}
+
+// =====================================================
+// Payment Method Breakdown
+// =====================================================
+
+export async function getPaymentMethodReport(shopId: string, days = 30) {
+  const supabase = await createClient();
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const { data, error } = await supabase
+    .from("sales")
+    .select("payment_method, total_amount")
+    .eq("shop_id", shopId)
+    .eq("status", "completed")
+    .gte("created_at", startDate.toISOString());
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  const breakdown: any = {};
+
+  data?.forEach((sale: any) => {
+    const method = sale.payment_method;
+    if (!breakdown[method]) {
+      breakdown[method] = {
+        method,
+        amount: 0,
+        count: 0,
+      };
+    }
+    breakdown[method].amount += Number(sale.total_amount);
+    breakdown[method].count += 1;
+  });
+
+  return { data: Object.values(breakdown), error: null };
+}
+
+// =====================================================
+// Inventory Value Report
+// =====================================================
+
+export async function getInventoryValueReport(shopId: string) {
+  const supabase = await createClient();
+
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("name, sku, stock_quantity, cost_price, price")
+    .eq("shop_id", shopId)
+    .eq("is_active", true);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  let totalInventoryValue = 0;
+  let totalRetailValue = 0;
+  let totalProducts = 0;
+  let outOfStockCount = 0;
+
+  products?.forEach((product: any) => {
+    const costPrice = Number(product.cost_price || 0);
+    const price = Number(product.price || 0);
+    const quantity = Number(product.stock_quantity || 0);
+
+    totalInventoryValue += costPrice * quantity;
+    totalRetailValue += price * quantity;
+    totalProducts += 1;
+
+    if (quantity === 0) {
+      outOfStockCount += 1;
+    }
+  });
+
+  const potentialProfit = totalRetailValue - totalInventoryValue;
+
+  return {
+    data: {
+      totalInventoryValue,
+      totalRetailValue,
+      potentialProfit,
+      totalProducts,
+      outOfStockCount,
+    },
+    error: null,
+  };
+}
+
+// =====================================================
+// Cashier Performance Report
+// =====================================================
+
+export async function getCashierPerformanceReport(
+  shopId: string,
+  startDate: string,
+  endDate: string
+) {
+  const supabase = await createClient();
+
+  const { data: sales, error } = await supabase
+    .from("sales")
+    .select(`
+      cashier_id,
+      total_amount,
+      created_at
+    `)
+    .eq("shop_id", shopId)
+    .eq("status", "completed")
+    .gte("created_at", startDate)
+    .lte("created_at", endDate);
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  // Get user details
+  const cashierIds = [...new Set(sales?.map((s: any) => s.cashier_id))];
+  const { data: users } = await supabase.auth.admin.listUsers();
+
+  const cashierMap: any = {};
+
+  sales?.forEach((sale: any) => {
+    const cashierId = sale.cashier_id;
+    if (!cashierMap[cashierId]) {
+      const user = users?.users.find((u) => u.id === cashierId);
+      cashierMap[cashierId] = {
+        cashierId,
+        cashierName: user?.user_metadata?.full_name || user?.email || "Unknown",
+        totalSales: 0,
+        totalRevenue: 0,
+        averageSaleValue: 0,
+      };
+    }
+    cashierMap[cashierId].totalSales += 1;
+    cashierMap[cashierId].totalRevenue += Number(sale.total_amount);
+  });
+
+  const performance = Object.values(cashierMap).map((c: any) => ({
+    ...c,
+    averageSaleValue: c.totalRevenue / c.totalSales,
+  }));
+
+  return { data: performance, error: null };
+}
+

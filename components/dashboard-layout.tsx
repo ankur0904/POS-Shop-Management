@@ -15,7 +15,11 @@ import {
   LogOut,
   Store,
   Menu,
-  X
+  X,
+  Users,
+  ShoppingBag,
+  FileText,
+  Table2,
 } from 'lucide-react'
 import { logout } from '@/app/actions/auth'
 import { useAuth, useCurrentShop } from '@/hooks/use-auth'
@@ -26,6 +30,10 @@ const navigation = [
   { name: 'POS', href: '/pos', icon: ShoppingCart },
   { name: 'Inventory', href: '/inventory', icon: Package },
   { name: 'Sales', href: '/sales', icon: BarChart3 },
+  { name: 'Suppliers', href: '/suppliers', icon: Users },
+  { name: 'Purchases', href: '/purchases', icon: ShoppingBag },
+  { name: 'Reports', href: '/reports', icon: FileText },
+  { name: 'Tables', href: '/tables', icon: Table2 },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
