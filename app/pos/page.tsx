@@ -10,12 +10,15 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrentShop } from '@/hooks/use-auth'
 import { useCartStore } from '@/lib/store/cart-store'
 import { getProducts } from '@/app/actions/products'
 import { createSale } from '@/app/actions/sales'
-import { Product, PaymentMethod } from '@/types/database.types'
-import { Search, Plus, Minus, Trash2, ShoppingBag, Share2 } from 'lucide-react'
+import { getTaxRates, getDefaultTaxRate } from '@/app/actions/tax-rates'
+import { getRestaurantTables } from '@/app/actions/tables'
+import { Product, PaymentMethod, TaxRate, RestaurantTable } from '@/types/database.types'
+import { Search, Plus, Minus, Trash2, ShoppingBag, Share2, Percent, IndianRupee } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateReceipt } from '@/lib/generate-receipt'
 import { getCurrencySymbol } from '@/lib/utils'
@@ -33,9 +36,23 @@ export default function POSPage() {
   const [sendReceipt, setSendReceipt] = useState(false)
   const [lastSaleData, setLastSaleData] = useState<any>(null)
 
+  // New state for GST and discounts
+  const [taxRates, setTaxRates] = useState<TaxRate[]>([])
+  const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null)
+  const [discountType, setDiscountType] = useState<'percentage' | 'amount'>('percentage')
+  const [discountValue, setDiscountValue] = useState<number>(0)
+  
+  // Restaurant mode state
+  const [tables, setTables] = useState<RestaurantTable[]>([])
+  const [selectedTableId, setSelectedTableId] = useState<string>('')
+
   useEffect(() => {
     if (shop) {
       loadProducts()
+      loadTaxRates()
+      if (shop.restaurant_mode_enabled) {
+        loadTables()
+      }
     }
   }, [shop])
 
@@ -60,6 +77,63 @@ export default function POSPage() {
     if (data) {
       setProducts(data)
       setFilteredProducts(data)
+    }
+  }
+
+  const loadTaxRates = async () => {
+    if (!shop) return
+
+    const { data: taxRatesData } = await getTaxRates(shop.id)
+    const { data: defaultTaxRate } = await getDefaultTaxRate(shop.id)
+
+    if (taxRatesData) {
+      setTaxRates(taxRatesData)
+      if (defaultTaxRate) {
+        setSelectedTaxRate(defaultTaxRate)
+      } else if (taxRatesData.length > 0) {
+        setSelectedTaxRate(taxRatesData[0])
+      }
+    }
+  }
+
+  const loadTables = async () => {
+    if (!shop) return
+
+    const { data } = await getRestaurantTables(shop.id)
+    if (data) {
+      setTables(data.filter(t => t.status === 'available'))
+    }
+  }
+
+  const calculateTotals = () => {
+    const subtotal = items.reduce((sum, item) => sum + item.quantity * item.product.price, 0)
+    
+    // Calculate discount
+    const discountAmount = discountType === 'percentage'
+      ? (subtotal * discountValue) / 100
+      : discountValue
+    
+    const taxableAmount = subtotal - discountAmount
+
+    // Calculate GST
+    const cgstPercentage = selectedTaxRate?.cgst_percentage || 0
+    const sgstPercentage = selectedTaxRate?.sgst_percentage || 0
+    const cgstAmount = (taxableAmount * cgstPercentage) / 100
+    const sgstAmount = (taxableAmount * sgstPercentage) / 100
+    const taxAmount = cgstAmount + sgstAmount
+
+    const totalAmount = taxableAmount + taxAmount
+
+    return {
+      subtotal,
+      discountAmount,
+      taxableAmount,
+      cgstPercentage,
+      sgstPercentage,
+      cgstAmount,
+      sgstAmount,
+      taxAmount,
+      totalAmount,
     }
   }
 
@@ -95,6 +169,8 @@ export default function POSPage() {
     setProcessing(true)
 
     try {
+      const totals = calculateTotals()
+      
       const saleItems = items.map((item) => ({
         productId: item.product.id,
         productName: item.product.name,
@@ -109,6 +185,14 @@ export default function POSPage() {
         paymentMethod,
         customerName: customerName || undefined,
         customerPhone: customerPhone || undefined,
+        cgstPercentage: totals.cgstPercentage,
+        sgstPercentage: totals.sgstPercentage,
+        cgstAmount: totals.cgstAmount,
+        sgstAmount: totals.sgstAmount,
+        taxAmount: totals.taxAmount,
+        discountAmount: totals.discountAmount,
+        discountPercentage: discountType === 'percentage' ? discountValue : 0,
+        tableId: selectedTableId || undefined,
       })
 
       if (error) {
@@ -135,7 +219,12 @@ export default function POSPage() {
       setCustomerPhone('')
       setSendReceipt(false)
       setSearchQuery('')
+      setDiscountValue(0)
+      setSelectedTableId('')
       loadProducts() // Refresh stock
+      if (shop.restaurant_mode_enabled) {
+        loadTables() // Refresh tables
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to complete sale')
     } finally {
@@ -323,12 +412,127 @@ export default function POSPage() {
           {/* Totals */}
           <div className="space-y-2 lg:space-y-3 mt-3 lg:mt-4">
             <Separator />
-            <div className="flex justify-between text-base lg:text-lg font-bold">
-              <span>Total</span>
-              <span>
-                {getCurrencySymbol(shop?.currency)} {total.toFixed(2)}
-              </span>
+
+            {/* Table Selection (if restaurant mode) */}
+            {shop?.restaurant_mode_enabled && tables.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-xs">Table (Optional)</Label>
+                <Select value={selectedTableId} onValueChange={setSelectedTableId}>
+                  <SelectTrigger className="text-sm h-10 md:h-11">
+                    <SelectValue placeholder="Select table" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Table</SelectItem>
+                    {tables.map((table) => (
+                      <SelectItem key={table.id} value={table.id}>
+                        {table.table_number} - {table.table_name || `Capacity: ${table.capacity}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Tax Rate Selector */}
+            {taxRates.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-xs">GST Rate</Label>
+                <Select
+                  value={selectedTaxRate?.id || ''}
+                  onValueChange={(value) => {
+                    const rate = taxRates.find((r) => r.id === value)
+                    setSelectedTaxRate(rate || null)
+                  }}
+                >
+                  <SelectTrigger className="text-sm h-10 md:h-11">
+                    <SelectValue placeholder="Select GST rate" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {taxRates.map((rate) => (
+                      <SelectItem key={rate.id} value={rate.id}>
+                        {rate.name} - {rate.rate}% (CGST {rate.cgst_percentage}% + SGST{' '}
+                        {rate.sgst_percentage}%)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Discount Input */}
+            <div className="space-y-2">
+              <Label className="text-xs">Discount</Label>
+              <div className="flex gap-2">
+                <Tabs
+                  value={discountType}
+                  onValueChange={(v) => {
+                    setDiscountType(v as 'percentage' | 'amount')
+                    setDiscountValue(0)
+                  }}
+                  className="w-24"
+                >
+                  <TabsList className="grid w-full grid-cols-2 h-10 md:h-11">
+                    <TabsTrigger value="percentage" className="text-xs">
+                      <Percent className="h-3 w-3" />
+                    </TabsTrigger>
+                    <TabsTrigger value="amount" className="text-xs">
+                      <IndianRupee className="h-3 w-3" />
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Input
+                  type="number"
+                  min="0"
+                  step={discountType === 'percentage' ? '1' : '0.01'}
+                  max={discountType === 'percentage' ? '100' : undefined}
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                  placeholder={discountType === 'percentage' ? 'Discount %' : 'Discount ₹'}
+                  className="flex-1 text-sm h-10 md:h-11"
+                />
+              </div>
             </div>
+
+            {/* Bill Breakdown */}
+            {items.length > 0 && (() => {
+              const totals = calculateTotals()
+              return (
+                <div className="space-y-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="font-medium">₹{totals.subtotal.toFixed(2)}</span>
+                  </div>
+                  {totals.discountAmount > 0 && (
+                    <div className="flex justify-between text-sm text-red-600">
+                      <span>Discount ({discountType === 'percentage' ? `${discountValue}%` : '₹'}):</span>
+                      <span className="font-medium">-₹{totals.discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Taxable Amount:</span>
+                    <span className="font-medium">₹{totals.taxableAmount.toFixed(2)}</span>
+                  </div>
+                  {totals.cgstAmount > 0 && (
+                    <>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <span>CGST ({totals.cgstPercentage}%):</span>
+                        <span>₹{totals.cgstAmount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <span>SGST ({totals.sgstPercentage}%):</span>
+                        <span>₹{totals.sgstAmount.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                  <Separator />
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Total Amount:</span>
+                    <span className="text-blue-600">₹{totals.totalAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Payment Method */}
             <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>

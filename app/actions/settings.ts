@@ -9,7 +9,10 @@ export async function updateShopSettings(formData: {
   phone?: string;
   email?: string;
   tax_id?: string;
+  gst_number?: string;
   currency?: string;
+  default_gst_rate?: number;
+  restaurant_mode_enabled?: boolean;
 }) {
   try {
     const supabase = await createClient();
@@ -59,7 +62,10 @@ export async function updateShopSettings(formData: {
         phone: formData.phone,
         email: formData.email,
         tax_id: formData.tax_id,
+        gst_number: formData.gst_number,
         currency: formData.currency,
+        default_gst_rate: formData.default_gst_rate,
+        restaurant_mode_enabled: formData.restaurant_mode_enabled,
         updated_at: new Date().toISOString(),
       })
       .eq("id", shopId)
@@ -75,6 +81,7 @@ export async function updateShopSettings(formData: {
     revalidatePath("/inventory");
     revalidatePath("/pos");
     revalidatePath("/sales");
+    revalidatePath("/tables");
     return { success: true, data: updatedShop };
   } catch (error) {
     console.error("Error updating shop settings:", error);

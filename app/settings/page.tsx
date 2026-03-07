@@ -14,13 +14,16 @@ import { useAuth, useCurrentShop } from '@/hooks/use-auth'
 import { Loader2 } from 'lucide-react'
 import { SettingsSkeleton } from '@/components/loading-skeletons'
 import { useTheme } from 'next-themes'
+import { initializeDefaultGSTRates, getTaxRates } from '@/app/actions/tax-rates'
 
 export default function SettingsPage() {
   const { user } = useAuth()
-  const { refreshShopData } = useCurrentShop()
+  const { shop, refreshShopData } = useCurrentShop()
   const { theme, setTheme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [gstRates, setGstRates] = useState<any[]>([])
+  const [loadingGst, setLoadingGst] = useState(false)
 
   // Business Settings State
   const [businessSettings, setBusinessSettings] = useState({
@@ -54,9 +57,42 @@ export default function SettingsPage() {
         })
       }
       setLoading(false)
+      
+      // Load GST rates if shop exists
+      if (shop?.id) {
+        loadGstRates()
+      }
     }
     loadSettings()
-  }, [])
+  }, [shop?.id])
+
+  const loadGstRates = async () => {
+    if (!shop?.id) return
+    const { data } = await getTaxRates(shop.id)
+    setGstRates(data || [])
+  }
+
+  const handleInitializeGST = async () => {
+    if (!shop?.id) {
+      toast.error('No shop found')
+      return
+    }
+    
+    setLoadingGst(true)
+    try {
+      const { error } = await initializeDefaultGSTRates(shop.id)
+      if (error) {
+        toast.error('Failed to initialize GST rates: ' + error)
+      } else {
+        toast.success('GST rates initialized successfully! (0%, 5%, 12%, 18%, 28%)')
+        loadGstRates()
+      }
+    } catch (err: any) {
+      toast.error('Error: ' + err.message)
+    } finally {
+      setLoadingGst(false)
+    }
+  }
 
   const handleBusinessSettingsSave = async () => {
     setSaving(true)
@@ -335,6 +371,67 @@ export default function SettingsPage() {
                   {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Business Settings
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* GST Configuration Card */}
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardHeader>
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <span>🧾</span> GST Configuration (Indian Tax System)
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Setup Indian GST rates with CGST + SGST split
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {gstRates.length === 0 ? (
+                  <div className="space-y-3">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800 font-medium mb-2">
+                        ⚠️ GST rates not configured
+                      </p>
+                      <p className="text-xs text-yellow-700">
+                        Click below to initialize common Indian GST rates (0%, 5%, 12%, 18%, 28%)
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={handleInitializeGST} 
+                      disabled={loadingGst}
+                      className="w-full sm:w-auto"
+                    >
+                      {loadingGst && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Initialize GST Rates
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-sm text-green-800 font-medium mb-2">
+                        ✅ GST Configured ({gstRates.length} rate{gstRates.length > 1 ? 's' : ''})
+                      </p>
+                      <div className="space-y-1">
+                        {gstRates.map((rate) => (
+                          <div key={rate.id} className="text-xs text-green-700 flex items-center gap-2">
+                            <span>•</span>
+                            <span className="font-medium">{rate.name}</span>
+                            <span className="text-gray-600">
+                              (CGST: {rate.cgst_percentage}% + SGST: {rate.sgst_percentage}%)
+                            </span>
+                            {rate.is_default && (
+                              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded">
+                                DEFAULT
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      💡 These rates are now available in POS for billing
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

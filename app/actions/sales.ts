@@ -19,7 +19,13 @@ export interface CreateSaleData {
   customerPhone?: string;
   customerEmail?: string;
   taxAmount?: number;
+  cgstPercentage?: number;
+  sgstPercentage?: number;
+  cgstAmount?: number;
+  sgstAmount?: number;
   discountAmount?: number;
+  discountPercentage?: number;
+  tableId?: string;
   notes?: string;
 }
 
@@ -41,9 +47,20 @@ export async function createSale(saleData: CreateSaleData) {
       (sum, item) => sum + item.quantity * item.unitPrice,
       0,
     );
-    const taxAmount = saleData.taxAmount || 0;
-    const discountAmount = saleData.discountAmount || 0;
-    const totalAmount = subtotal + taxAmount - discountAmount;
+    
+    // Apply discount
+    const discountPercentage = saleData.discountPercentage || 0;
+    const discountAmount = saleData.discountAmount || (subtotal * discountPercentage) / 100;
+    const subtotalAfterDiscount = subtotal - discountAmount;
+    
+    // Calculate GST (CGST + SGST)
+    const cgstPercentage = saleData.cgstPercentage || 0;
+    const sgstPercentage = saleData.sgstPercentage || 0;
+    const cgstAmount = (subtotalAfterDiscount * cgstPercentage) / 100;
+    const sgstAmount = (subtotalAfterDiscount * sgstPercentage) / 100;
+    const taxAmount = cgstAmount + sgstAmount;
+    
+    const totalAmount = subtotalAfterDiscount + taxAmount;
 
     // Generate invoice number
     const { data: invoiceNumberData } = await supabase.rpc(
@@ -78,13 +95,19 @@ export async function createSale(saleData: CreateSaleData) {
         invoice_number: invoiceNumber,
         subtotal,
         tax_amount: taxAmount,
+        cgst_percentage: cgstPercentage,
+        sgst_percentage: sgstPercentage,
+        cgst_amount: cgstAmount,
+        sgst_amount: sgstAmount,
         discount_amount: discountAmount,
+        discount_percentage: discountPercentage,
         total_amount: totalAmount,
         payment_method: saleData.paymentMethod,
         payment_reference: saleData.paymentReference,
         customer_name: saleData.customerName,
         customer_phone: saleData.customerPhone,
         customer_email: saleData.customerEmail,
+        table_id: saleData.tableId,
         notes: saleData.notes,
         cashier_id: user.id,
         status: "completed",
